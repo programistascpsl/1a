@@ -1,0 +1,136 @@
+-- LocalScript placed in StarterPlayerScripts
+local UserInputService = game:GetService("UserInputService")
+local Players = game:GetService("Players")
+local StarterGui = game:GetService("StarterGui")
+
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+local rootPart = character:WaitForChild("HumanoidRootPart")
+
+-- Create ScreenGui
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "NoclipFastRunMenu"
+screenGui.Parent = player.PlayerGui
+screenGui.ResetOnSpawn = false
+
+-- Create Frame for the menu
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 200, 0, 200)
+frame.Position = UDim2.new(0.5, -100, 0.5, -100)
+frame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+frame.BorderSizePixel = 0
+frame.Visible = false
+frame.Parent = screenGui
+
+-- Create Title
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0, 30)
+title.Position = UDim2.new(0, 0, 0, 0)
+title.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.Text = "Hack Menu"
+title.Font = Enum.Font.SourceSansBold
+title.TextSize = 20
+title.Parent = frame
+
+-- Create Noclip Button
+local noclipButton = Instance.new("TextButton")
+noclipButton.Size = UDim2.new(0.8, 0, 0, 40)
+noclipButton.Position = UDim2.new(0.1, 0, 0.2, 0)
+noclipButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+noclipButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+noclipButton.Text = "Noclip: OFF"
+noclipButton.Font = Enum.Font.SourceSans
+noclipButton.TextSize = 18
+noclipButton.Parent = frame
+
+-- Create Fast Run Button
+local fastRunButton = Instance.new("TextButton")
+fastRunButton.Size = UDim2.new(0.8, 0, 0, 40)
+fastRunButton.Position = UDim2.new(0.1, 0, 0.45, 0)
+fastRunButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+fastRunButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+fastRunButton.Text = "Fast Run: OFF"
+fastRunButton.Font = Enum.Font.SourceSans
+fastRunButton.TextSize = 18
+fastRunButton.Parent = frame
+
+-- Create Close Button
+local closeButton = Instance.new("TextButton")
+closeButton.Size = UDim2.new(0.8, 0, 0, 40)
+closeButton.Position = UDim2.new(0.1, 0, 0.7, 0)
+closeButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+closeButton.Text = "Close Menu"
+closeButton.Font = Enum.Font.SourceSans
+closeButton.TextSize = 18
+closeButton.Parent = frame
+
+-- Variables for noclip and fast run states
+local isNoclip = false
+local isFastRun = false
+local defaultWalkSpeed = humanoid.WalkSpeed
+local fastRunSpeed = 50 -- Adjust as needed
+
+-- Noclip functionality
+local function setNoclip(enabled)
+    isNoclip = enabled
+    noclipButton.Text = "Noclip: " .. (enabled and "ON" or "OFF")
+    for _, part in pairs(character:GetDescendants()) do
+        if part:IsA("BasePart") then
+            part.CanCollide = not enabled
+        end
+    end
+end
+
+-- Fast Run functionality
+local function setFastRun(enabled)
+    isFastRun = enabled
+    fastRunButton.Text = "Fast Run: " .. (enabled and "ON" or "OFF")
+    humanoid.WalkSpeed = enabled and fastRunSpeed or defaultWalkSpeed
+end
+
+-- Handle character respawn
+player.CharacterAdded:Connect(function(newCharacter)
+    character = newCharacter
+    humanoid = character:WaitForChild("Humanoid")
+    rootPart = character:WaitForChild("HumanoidRootPart")
+    defaultWalkSpeed = humanoid.WalkSpeed
+    if isNoclip then
+        setNoclip(true)
+    end
+    if isFastRun then
+        setFastRun(true)
+    end
+end)
+
+-- Noclip button click
+noclipButton.MouseButton1Click:Connect(function()
+    setNoclip(not isNoclip)
+end)
+
+-- Fast Run button click
+fastRunButton.MouseButton1Click:Connect(function()
+    setFastRun(not isFastRun)
+end)
+
+-- Close button click
+closeButton.MouseButton1Click:Connect(function()
+    frame.Visible = false
+end)
+
+-- Toggle menu with 'M' key
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.KeyCode == Enum.KeyCode.M then
+        frame.Visible = not frame.Visible
+    end
+end)
+
+-- Notify player
+StarterGui:SetCore("SendNotification", {
+    Title = "Menu Loaded",
+    Text = "Press 'M' to open/close the menu.",
+    Duration = 5
+})
